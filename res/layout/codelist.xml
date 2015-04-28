@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    
+    <ListView android:id="@+id/listcode" 
+                  android:layout_width="fill_parent"
+                  android:layout_height="fill_parent" 
+            
+    />
+        
+    </RelativeLayout>
+
+    <RadioGroup
+        	android:layout_width="fill_parent"
+        	android:layout_height="50dip"
+        	android:layout_gravity="bottom"
+        	android:gravity="center_vertical"
+        	android:orientation="horizontal" >
+        	
+		 <Button
+			android:id="@+id/btnCancel"
+			style="@style/main_tab_bottom"
+			android:gravity="center"
+			android:textSize="14sp"
+			android:text="Cancel">	
+				    
+		</Button> 
+		<View
+    		    android:layout_width="1dp"
+		    	android:layout_height="fill_parent"
+		    	android:background="@color/gray"/>
+		
+		
+		<Button
+			android:id="@+id/btnConfirm"
+			style="@style/main_tab_bottom"
+			android:gravity="center"
+			android:textSize="14sp"
+			android:text="Add">		    
+		</Button>    
+    </RadioGroup>
+
+</FrameLayout>

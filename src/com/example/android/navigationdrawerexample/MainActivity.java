@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Intent;
@@ -72,6 +73,7 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
     
 	// drawer general layout
 	private int itemselection = 0;
+	private int previous_selection = 0;
 	private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -108,16 +110,28 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 		        case 0:
 		        	break;
 		        case 1:
+		        	 
 					  rand_detection();
+		        
 					break;
 		        case 2:
-					  auto_detection();
+		        	  if(detecting) {
+		        		  detecting = false;
+		        	  }else{
+					    auto_detection();
+		        	  }
 					break;
 		        case 3:
 		        	  onSave();
 		        	 break;
 		        case 4:
-		        	  onOpen();
+		        	  if(taken){
+		        		  mCameraImage.setVisibility(View.GONE);
+		 				  mCameraPreview.setVisibility(View.VISIBLE);
+		        		  mCameraImage.setImageResource(0);
+		        		  taken = false;
+		        	  }
+		        	  else onOpen();
 		        	 break;
 				default:
 				
@@ -130,14 +144,22 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	//encode and decode variable
     private Boolean find = false;
     private int numberOfdetect = 20;
-    public static String[] codewordString ={"01010101","10010110","10110101","10101101"};
+    //public static String[] codewordString ={"101010010101","010101010101","110110010100","110100110010"};
     private static final int SELECT_PICTURE = 1;
     private String selectedImagePath;
+    private Boolean taken = false;
+    private Boolean detecting = false;
+    public static int codeLength = 12;
+	public static int hamming_weight = 6;
+    
+    //database 
+    public static DatabaseHelper dbhelper = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        dbhelper = new DatabaseHelper(this);
         mTitle = mDrawerTitle = getTitle();
         funtionTitles = getResources().getStringArray(R.array.function_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -187,15 +209,18 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	    width = size.x;
 	    height = size.y;
 	    
-	    //camera activity
-	    mIsCapturing= true;
-	    mCameraImage = (ImageView) findViewById(R.id.content);
-	    mCameraImage.setVisibility(View.INVISIBLE);
+	  
 	    
 	    mCameraPreview = (SurfaceView) findViewById(R.id.preview_view);
 	    final SurfaceHolder surfaceHolder = mCameraPreview.getHolder();
 	    surfaceHolder.addCallback(this);
 	    surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+	    
+	    //camera activity
+	    mIsCapturing= true;
+	    mCameraImage = (ImageView) findViewById(R.id.content);
+	    mCameraImage.setVisibility(View.INVISIBLE);
+	    
 	    if (mCamera==null)
 	    {
 	    	try {
@@ -234,6 +259,7 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	    
 	    //mask view
 	    maskView = (View) findViewById(R.id.maskView);
+	   
     }
 
     @Override
@@ -288,32 +314,57 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
     private void selectItem(int position) {
         
 		itemselection = position;
-		
-        if(itemselection==1 || itemselection==2){
+		if(itemselection==0 && previous_selection !=0){
+			mCameraImage.setImageResource(0);
+        	maskView.setVisibility(View.GONE);
+        	mButton.setImageResource(R.drawable.ic_action_camera);
+		}
+        if(itemselection==1 ){
+        	//mCameraImage.setImageResource(0);
+        	
+        	maskView.setVisibility(View.GONE);
+        	//mCameraPreview.setVisibility(View.VISIBLE);
+        	mButton.setImageResource(R.drawable.ic_action_camera);
+        } 
+        if(itemselection==2 ){
         	mCameraImage.setImageResource(0);
         	
-        	if(itemselection==2)
         	maskView.setVisibility(View.VISIBLE);
-        	
-        	mCameraPreview.setVisibility(View.VISIBLE);
+        	//mCameraPreview.setVisibility(View.VISIBLE);
         	mButton.setImageResource(R.drawable.ic_action_camera);
         } 
         if(itemselection==3) {
         	mCameraImage.setImageResource(0);
-        	maskView.setVisibility(View.INVISIBLE);
+        	maskView.setVisibility(View.GONE);
+        	
         	mCameraPreview.setVisibility(View.VISIBLE);
         	mButton.setImageResource(R.drawable.ic_action_save);	
         }
         if(itemselection==4) {
         	mCameraImage.setImageResource(0);
-        	maskView.setVisibility(View.INVISIBLE);
+        	maskView.setVisibility(View.GONE);
+        	
         	mCameraPreview.setVisibility(View.VISIBLE);
         	mButton.setImageResource(R.drawable.ic_action_new);
         }
+        if(itemselection ==5)
+        {
+        	Intent eventIntent = new Intent(this, codelist.class);
+ 	        startActivity(eventIntent);
+        }
+        if(itemselection==6)
+        {
+        	Intent eventIntent = new Intent(this, setting.class);
+ 	        startActivity(eventIntent);
+        }
+        
+        if(itemselection ==7)
+        	 goToUrl("http://en.wikipedia.org/wiki/Visible_light_communication");
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);
         setTitle(funtionTitles[position]);
         mDrawerLayout.closeDrawer(mDrawerList);
+        previous_selection = itemselection;
     }
 
     @Override
@@ -380,7 +431,13 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 			
 			break;
         case 1:
-			  rand_detection_post();
+        	
+			  try {
+				rand_detection_post();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			break;
         case 2:
 			   auto_detection_post();
@@ -395,6 +452,7 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 	    if (requestCode == SELECT_PICTURE){
             if(resultCode ==RESULT_OK){
+            	 taken= true;
             	 Uri selectedImageUri = data.getData();
                  selectedImagePath = getPath(selectedImageUri);
                  File imageFile = new File(selectedImagePath);
@@ -545,6 +603,7 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	  //Auto detection
 	  private void auto_detection(){
 		//set out maskview;
+		detecting = true;
 		mCameraPreview.setVisibility(View.VISIBLE);
 		maskView.setVisibility(View.VISIBLE);
 		 try {
@@ -553,8 +612,10 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 			// TODO: handle exception
 		}
 	}
-	  private void auto_detection_post(){
+	  @SuppressLint("ShowToast")
+	private void auto_detection_post(){
 			//set out maskview;
+		  if(!detecting) return;
 		  String tmpString = new String();
 			maskView.setVisibility(View.VISIBLE);
 			if (mCameraData != null) {
@@ -567,8 +628,12 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 		      
 		      
 		      String finalResult = correlation_detection(tmpString);
-		      for(int i = 0 ; i <4 ;i++){
-		    	  if(finalResult.equals(MainActivity.codewordString[i]))
+		      if(codelist.codeArrayList.size()==0){
+		    	  Toast.makeText(MainActivity.this, "Data list is empty.", Toast.LENGTH_LONG);
+		    	  return ;
+		      }
+		      for(int i = 0 ; i <codelist.codeArrayList.size() ;i++){
+		    	  if(finalResult.equals(codelist.codeArrayList.get(i)))
 		    		  find = true;
 		      }
 		      if(find){
@@ -589,39 +654,42 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	  //Rand detection
 	  private void rand_detection(){
 		//set out maskview;
-		maskView.setVisibility(View.INVISIBLE);
+		maskView.setVisibility(View.GONE);
 		 try {
 			  mCamera.takePicture(null, null, this);
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 	  }
-	  private void rand_detection_post(){
+	  private void rand_detection_post() throws InterruptedException{
 		  String result = new String();
-		  mCameraPreview.setVisibility(View.INVISIBLE);
-		  maskView.setVisibility(View.INVISIBLE);
+		  
 		  if (mCameraData != null) {
 	    	  mBitmap = BitmapFactory.decodeByteArray(mCameraData, 0, mCameraData.length);
 	    	  Matrix matrix = new Matrix();
 	          matrix.postRotate(90);
               mBitmap = Bitmap.createBitmap(mBitmap , 0, 0, mBitmap.getWidth(), mBitmap.getHeight(), matrix, true);
               mCameraImage.setImageBitmap(mBitmap);
+              
+              Thread.sleep(1000);
     		  result = random_detection();
+              
 		  }
 		  //mCameraPreview.setVisibility(View.INVISIBLE);
 		 
-		  for(int i = 0 ; i <4 ;i++){
-	    	  if(result.equals(MainActivity.codewordString[i]))
+		  for(int i = 0 ; i <codelist.codeArrayList.size() ;i++){
+	    	  if(result.equals(codelist.codeArrayList.get(i)))
 	    		  find = true;
 	      }
-	      if(find){
+	      
 	      Intent intent = new Intent(getBaseContext(), result.class);
 	      intent.putExtra("result", result);
 	      startActivity(intent);
 	      find =  false;
+	     
 	      
 	      overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-	      }
+	      
 	  }
 	  
 	 // Help function
@@ -799,18 +867,18 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	  
 	  public static String correlation_detection(String result){
 	    	
-	    	if(result.length()<8) return "noting detected";
+	    	if(result.length()<codeLength) return "noting detected";
 	    	
 	    	Log.d("raw result",result);
 	    	
-	    	for(int i = 0;i< result.length()-7;i++){
+	    	for(int i = 0;i< result.length()-codeLength+1;i++){
 				for(int j = 0 ; j < 4; j++){
-					String detect = result.substring(i, i+8);
-					int corr = matrix_muti(detect, codewordString[j]);
+					String detect = result.substring(i, i+codeLength);
+					int corr = matrix_muti(detect, codelist.codeArrayList.get(j));
 					Log.d("detect",Integer.toString(corr));
-					if(corr >= 4){
-						for(int m = 0; m<4;m++){
-							if(detect.equals(codewordString[m])) return detect;
+					if(corr >= hamming_weight-1){
+						for(int m = 0; m<codelist.codeArrayList.size();m++){
+							if(detect.equals(codelist.codeArrayList.get(m))) return detect;
 						}
 						
 						
@@ -850,19 +918,24 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 
 	        return randomNum;
 	    }
-	  private String random_detection(){
+	  private String random_detection() throws InterruptedException{
 	    	int imageW = mCameraImage.getWidth();
 			int imageH = mCameraImage.getHeight();
 			int imgWidth = mBitmap.getWidth();
 			int imgHeight = mBitmap.getHeight();
-	    	
-	    	int[] record = {0,0,0,0};
+			
+			int[] record = new int[codeLength];
+			for(int k = 0 ; k< codeLength; k++){
+				record[k] =0;
+			}
 	    	for(int i = 0 ; i<numberOfdetect;i++){
 	    		int x = randInt(0, imageW-(int)(((float) mask.wid*2)/imgWidth*imageW));
 	    		int y = randInt(0, imageH-(int)(((float) mask.hei*2)/imgHeight*imageH));
-	    		String tmpString =decodeImage_rand(x, y);
-	    		for(int j = 0 ; j < 4 ;j++){
-	    			if(tmpString.equals(codewordString[j]))
+	    	   
+	    	    String tmpString =decodeImage_rand(x, y);
+	    		
+	    		for(int j = 0 ; j < codelist.codeArrayList.size() ;j++){
+	    			if(tmpString.equals(codelist.codeArrayList.get(j)))
 	    				record[j]++;
 	    		}
 	    	}
@@ -873,7 +946,12 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	    	   maxIndex = i;
 	    	  }
 	    	}
-	    	return codewordString[maxIndex];
+	    	
+	    	if(record[maxIndex] > 0){
+	    	return codelist.codeArrayList.get(maxIndex);
+	    	}else{
+	    		return "Nothing Find";
+	    	}
 	    }
 	  private String decodeImage_rand(int x, int y){
 			 
@@ -1114,4 +1192,9 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 		      }
 		    }
 		  }
+	  private void goToUrl (String url) {
+	        Uri uriUrl = Uri.parse(url);
+	        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
+	        startActivity(launchBrowser);
+	    }
 }

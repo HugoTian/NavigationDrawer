@@ -11,6 +11,10 @@ public final class R {
     public static final class anim {
         public static final int fadein=0x7f040000;
         public static final int fadeout=0x7f040001;
+        public static final int left_in=0x7f040002;
+        public static final int left_out=0x7f040003;
+        public static final int right_in=0x7f040004;
+        public static final int right_out=0x7f040005;
     }
     public static final class array {
         public static final int function_array=0x7f080000;
@@ -61,24 +65,35 @@ public final class R {
         public static final int venus=0x7f02000f;
     }
     public static final class id {
-        public static final int action_websearch=0x7f0b000b;
-        public static final int btnCancel=0x7f0b0009;
-        public static final int btnConfirm=0x7f0b000a;
+        public static final int action_websearch=0x7f0b0011;
+        public static final int btnCancel=0x7f0b000a;
+        public static final int btnConfirm=0x7f0b000b;
         public static final int camera_frame=0x7f0b0001;
         public static final int content=0x7f0b0002;
         public static final int drawer_layout=0x7f0b0000;
-        public static final int etResult=0x7f0b0008;
-        public static final int image=0x7f0b0007;
+        public static final int editCode=0x7f0b0008;
+        public static final int editLink=0x7f0b0009;
+        public static final int editTitle=0x7f0b0007;
+        public static final int editlength=0x7f0b000f;
+        public static final int editweight=0x7f0b0010;
+        public static final int etResult=0x7f0b000e;
+        public static final int image=0x7f0b000d;
         public static final int imageButton=0x7f0b0005;
         public static final int left_drawer=0x7f0b0006;
+        public static final int listcode=0x7f0b000c;
         public static final int maskView=0x7f0b0004;
         public static final int preview_view=0x7f0b0003;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
-        public static final int drawer_list_item=0x7f030001;
-        public static final int fragment_planet=0x7f030002;
-        public static final int result=0x7f030003;
+        public static final int add_code=0x7f030001;
+        public static final int codedetail=0x7f030002;
+        public static final int codelist=0x7f030003;
+        public static final int drawer_list_item=0x7f030004;
+        public static final int editcode=0x7f030005;
+        public static final int fragment_planet=0x7f030006;
+        public static final int result=0x7f030007;
+        public static final int setting=0x7f030008;
     }
     public static final class menu {
         public static final int main=0x7f0a0000;

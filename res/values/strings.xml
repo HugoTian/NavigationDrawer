@@ -22,9 +22,9 @@
         <item>Auto Detection</item>
         <item>Save</item>
         <item>Open</item>
-        <item>Draw</item>
-        <item>About </item>
-        <item>VLC info</item>
+        <item>Code</item>
+        <item>Setting </item>
+        <item>About</item>
     </string-array>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
