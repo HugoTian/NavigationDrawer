@@ -27,8 +27,10 @@ public class setting extends Activity{
         lengthEditText = (EditText) findViewById(R.id.editlength);
         weightEditText = (EditText) findViewById(R.id.editweight);
         
+        
         lengthEditText.setText("12");
         weightEditText.setText("6");
+        
         confirmButton = (Button) findViewById(R.id.btnConfirm);
         cancelButton = (Button) findViewById(R.id.btnCancel);
         
@@ -48,6 +50,7 @@ public class setting extends Activity{
 				// TODO Auto-generated method stub
 				MainActivity.codeLength =12;
 				MainActivity.hamming_weight =6;
+				
 				finish();
 				overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 			}
@@ -57,6 +60,7 @@ public class setting extends Activity{
 	private void saveSetting(){
 		  MainActivity.codeLength = Integer.valueOf(lengthEditText.getText().toString());
 		  MainActivity.hamming_weight = Integer.valueOf(weightEditText.getText().toString());
+		  
 		  finish();
 		  overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 	}

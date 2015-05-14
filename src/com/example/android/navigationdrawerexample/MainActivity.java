@@ -16,6 +16,12 @@
 
 package com.example.android.navigationdrawerexample;
 
+import static android.provider.BaseColumns._ID;
+import static com.example.android.navigationdrawerexample.DatabaseConstants.CODE_CONTENT;
+import static com.example.android.navigationdrawerexample.DatabaseConstants.CODE_LINK;
+import static com.example.android.navigationdrawerexample.DatabaseConstants.CODE_TITLE;
+import static com.example.android.navigationdrawerexample.DatabaseConstants.TABLE_NAME;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,12 +31,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+
+import android.R.integer;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -64,6 +73,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -110,7 +120,7 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 		        case 0:
 		        	break;
 		        case 1:
-		        	 
+		        	  detectingTextView.setVisibility(View.INVISIBLE);
 					  rand_detection();
 		        
 					break;
@@ -151,9 +161,18 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
     private Boolean detecting = false;
     public static int codeLength = 12;
 	public static int hamming_weight = 6;
-    
+	private TextView detectingTextView;
+    private int detectionNUmber =0;
+	private static SQLiteDatabase db;
+	 // listView for list of keys
+	 
+	 
     //database 
     public static DatabaseHelper dbhelper = null;
+    public  static ArrayList<String> idList = new ArrayList<String>();
+	 public  static ArrayList<String> titleList = new ArrayList<String>();
+	 public  static ArrayList<String> codeList = new ArrayList<String>();
+	 public  static ArrayList<String> linkList = new ArrayList<String>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -209,7 +228,7 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	    width = size.x;
 	    height = size.y;
 	    
-	  
+	    detectingTextView = (TextView) findViewById(R.id.textDect);
 	    
 	    mCameraPreview = (SurfaceView) findViewById(R.id.preview_view);
 	    final SurfaceHolder surfaceHolder = mCameraPreview.getHolder();
@@ -259,7 +278,43 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	    
 	    //mask view
 	    maskView = (View) findViewById(R.id.maskView);
-	   
+	    
+	    // Database
+	    
+	    db = dbhelper.getReadableDatabase();
+	    Cursor c =db.rawQuery("SELECT * FROM " + TABLE_NAME , null);
+	    
+	    int titleColumn = 0,codeColumn = 0,id = 0,linkcolumn = 0,i = 0;
+	    if(c!=null){
+	        titleColumn = c.getColumnIndex(CODE_TITLE);
+            codeColumn = c.getColumnIndex(CODE_CONTENT);
+            id = c.getColumnIndex(_ID);
+            linkcolumn = c.getColumnIndex(CODE_LINK);
+            i = 0;
+	    }
+        
+        titleList.clear();
+        codeList.clear();
+        idList.clear();
+        linkList.clear();
+        // Check if our result was valid.
+        
+        if (c.getCount() > 0 && c!=null) {
+         // Loop through all Results
+       	 c.moveToFirst();
+         do {
+          String titleString = c.getString(titleColumn);
+          String codeString = c.getString(codeColumn);
+          String idString =c.getString(id);
+          String linkString = c.getString(linkcolumn);
+          
+          titleList.add(i, titleString);
+          codeList.add(i,codeString);
+          idList.add(i,idString);
+          linkList.add(i, linkString);
+          i++;
+         }while(c.moveToNext());
+       }
     }
 
     @Override
@@ -321,14 +376,14 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 		}
         if(itemselection==1 ){
         	//mCameraImage.setImageResource(0);
-        	
+        	detectingTextView.setVisibility(View.INVISIBLE);
         	maskView.setVisibility(View.GONE);
         	//mCameraPreview.setVisibility(View.VISIBLE);
         	mButton.setImageResource(R.drawable.ic_action_camera);
         } 
         if(itemselection==2 ){
         	mCameraImage.setImageResource(0);
-        	
+        	detectingTextView.setVisibility(View.INVISIBLE);
         	maskView.setVisibility(View.VISIBLE);
         	//mCameraPreview.setVisibility(View.VISIBLE);
         	mButton.setImageResource(R.drawable.ic_action_camera);
@@ -336,33 +391,37 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
         if(itemselection==3) {
         	mCameraImage.setImageResource(0);
         	maskView.setVisibility(View.GONE);
-        	
+        	detectingTextView.setVisibility(View.INVISIBLE);
         	mCameraPreview.setVisibility(View.VISIBLE);
         	mButton.setImageResource(R.drawable.ic_action_save);	
         }
         if(itemselection==4) {
         	mCameraImage.setImageResource(0);
         	maskView.setVisibility(View.GONE);
-        	
+        	detectingTextView.setVisibility(View.INVISIBLE);
         	mCameraPreview.setVisibility(View.VISIBLE);
         	mButton.setImageResource(R.drawable.ic_action_new);
         }
         if(itemselection ==5)
         {
+        	detectingTextView.setVisibility(View.INVISIBLE);
         	Intent eventIntent = new Intent(this, codelist.class);
  	        startActivity(eventIntent);
         }
         if(itemselection==6)
         {
+        	detectingTextView.setVisibility(View.INVISIBLE);
         	Intent eventIntent = new Intent(this, setting.class);
  	        startActivity(eventIntent);
         }
         
-        if(itemselection ==7)
+        if(itemselection ==7){
+        	 detectingTextView.setVisibility(View.INVISIBLE);
         	 goToUrl("http://en.wikipedia.org/wiki/Visible_light_communication");
+        }
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);
-        setTitle(funtionTitles[position]);
+        setTitle("LightSay® by T.Zhang");
         mDrawerLayout.closeDrawer(mDrawerList);
         previous_selection = itemselection;
     }
@@ -440,7 +499,12 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 			}
 			break;
         case 2:
-			   auto_detection_post();
+			   try {
+				auto_detection_post();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			break;
 
 		default:
@@ -613,8 +677,9 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 		}
 	}
 	  @SuppressLint("ShowToast")
-	private void auto_detection_post(){
+	private void auto_detection_post() throws InterruptedException{
 			//set out maskview;
+		  detectingTextView.setVisibility(View.INVISIBLE);
 		  if(!detecting) return;
 		  String tmpString = new String();
 			maskView.setVisibility(View.VISIBLE);
@@ -628,27 +693,40 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 		      
 		      
 		      String finalResult = correlation_detection(tmpString);
-		      if(codelist.codeArrayList.size()==0){
+		      if(codeList.size()==0){
 		    	  Toast.makeText(MainActivity.this, "Data list is empty.", Toast.LENGTH_LONG);
 		    	  return ;
 		      }
-		      for(int i = 0 ; i <codelist.codeArrayList.size() ;i++){
-		    	  if(finalResult.equals(codelist.codeArrayList.get(i)))
+		      for(int i = 0 ; i <codeList.size() ;i++){
+		    	  if(finalResult.equals(codeList.get(i)))
 		    		  find = true;
 		      }
 		      if(find){
+		    	
 		      Intent intent = new Intent(getBaseContext(), result.class);
 		      intent.putExtra("result", finalResult);
 		      startActivity(intent);
 		      find =  false;
 		     
 		      overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+		      
+		    	//  int index = codeList.indexOf(finalResult);
+		    	//  goToUrl(linkList.get(index));
 		      }
-			 try {
-				  mCamera.takePicture(null, null, this);
-			} catch (Exception e) {
+		      else{
+		    	  detectionNUmber++;
+		    	  if(detectionNUmber==2){
+		    		  detectingTextView.setVisibility(View.VISIBLE);
+		    		  detectionNUmber=0;
+		    		  return;
+		    	  }
+		    	  Thread.sleep(1000);
+			     try {
+				    mCamera.takePicture(null, null, this);
+			      } catch (Exception e) {
 				// TODO: handle exception
-			}
+			      }
+		      }
 		}
 	  
 	  //Rand detection
@@ -671,24 +749,37 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
               mBitmap = Bitmap.createBitmap(mBitmap , 0, 0, mBitmap.getWidth(), mBitmap.getHeight(), matrix, true);
               mCameraImage.setImageBitmap(mBitmap);
               
-              Thread.sleep(1000);
+              
     		  result = random_detection();
               
 		  }
 		  //mCameraPreview.setVisibility(View.INVISIBLE);
 		 
-		  for(int i = 0 ; i <codelist.codeArrayList.size() ;i++){
-	    	  if(result.equals(codelist.codeArrayList.get(i)))
+		  for(int i = 0 ; i <codeList.size() ;i++){
+	    	  if(result.equals(codeList.get(i)))
 	    		  find = true;
 	      }
-	      
+	      /*
 	      Intent intent = new Intent(getBaseContext(), result.class);
 	      intent.putExtra("result", result);
 	      startActivity(intent);
 	      find =  false;
-	     
 	      
-	      overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+	      
+	       */
+		  if(find){
+		  //int index = codeList.indexOf(result);
+    	  //goToUrl(linkList.get(index));
+			  Intent intent = new Intent(getBaseContext(), result.class);
+		      intent.putExtra("result", result);
+		      find =  false;
+		      startActivity(intent);
+		      
+	      //overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+		  }
+		  else{
+			  detectingTextView.setVisibility(View.VISIBLE);
+		  }
 	      
 	  }
 	  
@@ -872,14 +963,18 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	    	Log.d("raw result",result);
 	    	
 	    	for(int i = 0;i< result.length()-codeLength+1;i++){
-				for(int j = 0 ; j < 4; j++){
+				for(int j = 0 ; j < codeList.size(); j++){
 					String detect = result.substring(i, i+codeLength);
-					int corr = matrix_muti(detect, codelist.codeArrayList.get(j));
+					int corr = matrix_muti(detect, codeList.get(j));
 					Log.d("detect",Integer.toString(corr));
 					if(corr >= hamming_weight-1){
-						for(int m = 0; m<codelist.codeArrayList.size();m++){
-							if(detect.equals(codelist.codeArrayList.get(m))) return detect;
+						int tmp =0;
+						for(int l = 0 ; l < detect.length();l++){
+							if(detect.charAt(l) != codeList.get(j).charAt(l))
+								tmp++;
 						}
+						if(tmp<2)
+						return codeList.get(j);
 						
 						
 					}
@@ -934,8 +1029,8 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	    	   
 	    	    String tmpString =decodeImage_rand(x, y);
 	    		
-	    		for(int j = 0 ; j < codelist.codeArrayList.size() ;j++){
-	    			if(tmpString.equals(codelist.codeArrayList.get(j)))
+	    		for(int j = 0 ; j < codeList.size() ;j++){
+	    			if(tmpString.equals(codeList.get(j)))
 	    				record[j]++;
 	    		}
 	    	}
@@ -948,7 +1043,7 @@ public class MainActivity extends Activity  implements PictureCallback, SurfaceH
 	    	}
 	    	
 	    	if(record[maxIndex] > 0){
-	    	return codelist.codeArrayList.get(maxIndex);
+	    	return codeList.get(maxIndex);
 	    	}else{
 	    		return "Nothing Find";
 	    	}

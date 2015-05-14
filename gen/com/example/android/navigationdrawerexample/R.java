@@ -65,24 +65,34 @@ public final class R {
         public static final int venus=0x7f02000f;
     }
     public static final class id {
-        public static final int action_websearch=0x7f0b0011;
-        public static final int btnCancel=0x7f0b000a;
-        public static final int btnConfirm=0x7f0b000b;
+        public static final int action_websearch=0x7f0b001b;
+        public static final int btnCancel=0x7f0b000b;
+        public static final int btnConfirm=0x7f0b000c;
         public static final int camera_frame=0x7f0b0001;
         public static final int content=0x7f0b0002;
         public static final int drawer_layout=0x7f0b0000;
-        public static final int editCode=0x7f0b0008;
-        public static final int editLink=0x7f0b0009;
-        public static final int editTitle=0x7f0b0007;
-        public static final int editlength=0x7f0b000f;
-        public static final int editweight=0x7f0b0010;
-        public static final int etResult=0x7f0b000e;
-        public static final int image=0x7f0b000d;
-        public static final int imageButton=0x7f0b0005;
-        public static final int left_drawer=0x7f0b0006;
-        public static final int listcode=0x7f0b000c;
+        public static final int editCode=0x7f0b0009;
+        public static final int editLink=0x7f0b000a;
+        public static final int editTitle=0x7f0b0008;
+        public static final int editlength=0x7f0b0011;
+        public static final int editweight=0x7f0b0012;
+        public static final int etResult=0x7f0b0010;
+        public static final int etResultcode=0x7f0b000f;
+        public static final int exposure=0x7f0b0017;
+        public static final int image=0x7f0b000e;
+        public static final int imageButton=0x7f0b0006;
+        public static final int iso=0x7f0b0013;
+        public static final int large=0x7f0b0014;
+        public static final int left_drawer=0x7f0b0007;
+        public static final int listcode=0x7f0b000d;
         public static final int maskView=0x7f0b0004;
+        public static final int max=0x7f0b0018;
+        public static final int medium=0x7f0b0015;
+        public static final int middle=0x7f0b0019;
+        public static final int min=0x7f0b001a;
         public static final int preview_view=0x7f0b0003;
+        public static final int small=0x7f0b0016;
+        public static final int textDect=0x7f0b0005;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
@@ -96,7 +106,8 @@ public final class R {
         public static final int setting=0x7f030008;
     }
     public static final class menu {
-        public static final int main=0x7f0a0000;
+        public static final int camera_option=0x7f0a0000;
+        public static final int main=0x7f0a0001;
     }
     public static final class string {
         public static final int action_websearch=0x7f070003;
