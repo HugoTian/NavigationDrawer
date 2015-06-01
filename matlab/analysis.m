@@ -32,7 +32,10 @@ subplot(2,3,4) ; imshow(Ig); title('Histogram equ');
 %% get the pixels of image
 [rows columns numberOfColorChannels] = size(I)
 sumOfPixel = [];
-%% sum the pixels of each columns
+%% choose a area, the mid of clumns, and the 1/5 to 2/5 of rows
+%% this area can be modified
+%% sum the pixels of each columns in this area
+
 for i = columns/4:3*columns/4-1
 	sumOfPixel = [sumOfPixel sum(I(rows/5:rows*2/5,i))];
 end
@@ -43,6 +46,7 @@ subplot(2,3,5);plot(sumOfPixel);title('Original pixels');
 %%decode prossure
 subplot(2,3,6);plot(sumOfPixel);title('Original pixels');
 
+%% find the local max
 pks =[];
 loc =[];
 
@@ -57,6 +61,7 @@ loc
 minIdx=[];
 minValue = [];
 
+%% find the local min
 for i = 2:columns-1
    if sumOfPixel(i-1)>sumOfPixel(i) && sumOfPixel(i) < sumOfPixel(i+1) && sumOfPixel(i) < mean(sumOfPixel(columns/4:columns*3/4))
 
@@ -64,6 +69,8 @@ for i = 2:columns-1
        minValue = [minValue, sumOfPixel(i)];
    end
 end
+
+%% get threshold based on local min and max
 middle = [];
 x = [1:columns];
 for i = 1 : loc(1)
@@ -85,47 +92,11 @@ plot(minIdx,minValue,'r+');
 plot (middle,'r');
 hold off
 
+%% binarization
 
-%{
-m=1,n=1;
-combine = [];
-while m<=length(loc) && n<=length(minIdx)
-    if loc(m) < minIdx(n)
-        combine = [combine loc(m)];
-        m = m + 1;
-    else
-        combine = [combine minIdx(n)];
-        n = n + 1;
-    end
-end
+decode = (sumOfPixel > middle);
 
-while n<=length(minIdx)
-    combine = [combine minIdx(n)];
-    n = n +1;
-end
-
-while m<=length(loc)
-    combine = [combine loc(m)];
-    m = m +1;
-end
-combine
-data = [];
-for i = 1:length(loc)-1
-    tmp = loc(i);
-    data = [data 1];
-    while tmp+gap < loc(i+1)
-        if(sumOfPixel(tmp+gap) > middle)
-            data = [data 1];
-        else
-            data = [data 0];
-        end
-        tmp= tmp+gap;
-    end
-end
-data
-%}
-
-decode = (sumOfPixel > middle)
+%% find the minimum length of consecutive 1 or 0 
 gap = 1;
 min = 100;
 for i = 1 :239
@@ -145,6 +116,8 @@ for i = 1 :239
     
     
 end
+
+%% decode and final code is in data array
 data = [];
 one = 0;
 zero = 0;
